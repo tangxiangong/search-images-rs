@@ -1,0 +1,34 @@
+[package]
+name = "search-images-rs"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+accelerate = ["candle-core/accelerate"]
+cuda = ["candle-core/cuda", "candle-core/cudarc", "candle-core/cudnn"]
+mkl = ["candle-core/mkl"]
+# 如果目标平台是 macOS 且架构是 aarch64 （即 M 系列芯片），则默认启用 accelerate 特性
+[target.'cfg(all(target_os = "macos", target_arch = "aarch64"))']
+default = ["accelerate"]
+
+[dependencies]
+axum = { version = "0.8.4", features = ["macros"] }
+candle-core = "0.9.1"
+config = { version = "0.15.11", features = ["toml"] }
+dirs = "6.0.0"
+image = "0.25.6"
+qdrant-client = "1.14.0"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tokio = { version = "1", features = ["rt", "macros", "rt-multi-thread"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["trace", "cors", "timeout"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+[profile.release]
+lto = true
+opt-level = 3
+codegen-units = 1
+panic = "abort"
