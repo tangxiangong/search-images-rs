@@ -4,12 +4,14 @@ version = "0.1.0"
 edition = "2024"
 
 [features]
+default = []
 accelerate = ["candle-core/accelerate"]
 cuda = ["candle-core/cuda", "candle-core/cudarc", "candle-core/cudnn"]
 mkl = ["candle-core/mkl"]
-# 如果目标平台是 macOS 且架构是 aarch64 （即 M 系列芯片），则默认启用 accelerate 特性
-[target.'cfg(all(target_os = "macos", target_arch = "aarch64"))']
-default = ["accelerate"]
+
+# 如果目标平台是 macOS 且架构是 aarch64 （即 M 系列芯片），则启用 accelerate 特性
+[target.'cfg(all(target_os = "macos", target_arch = "aarch64"))'.dependencies]
+candle-core = { version = "0.9.1", features = ["accelerate"] }
 
 [dependencies]
 axum = { version = "0.8.4", features = ["macros"] }
