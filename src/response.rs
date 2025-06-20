@@ -95,9 +95,10 @@ impl AppResponse {
     }
 }
 
-impl<T: Serialize + Send, M: Serialize + Send> Scribe for AppResponse<T, M> {
-    fn render(self, res: &mut Response) {
+#[async_trait]
+impl<T: Serialize + Send, M: Serialize + Send> Writer for AppResponse<T, M> {
+    async fn write(self, _req: &mut Request, _depot: &mut Depot, res: &mut Response) {
         res.status_code(self.status_code);
-        res.render(Json(self))
+        res.render(Json(self));
     }
 }

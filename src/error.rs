@@ -56,7 +56,8 @@ impl From<AppError> for AppResponse {
 #[async_trait]
 impl Writer for AppError {
     async fn write(self, _req: &mut Request, _depot: &mut Depot, res: &mut Response) {
-        res.render(AppResponse::from(self))
+        res.status_code(self.status_code);
+        res.render(Json(AppResponse::from(self)));
     }
 }
 
