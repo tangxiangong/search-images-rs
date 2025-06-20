@@ -1,8 +1,5 @@
-use crate::{impl_from_axum_error, impl_into_internal_error, response::AppResponse};
-use axum::{
-    http::StatusCode,
-    response::{IntoResponse, Response},
-};
+use crate::{impl_into_internal_error, response::AppResponse};
+use salvo::prelude::*;
 use serde::Serialize;
 
 #[derive(Debug, Serialize, Clone)]
@@ -50,15 +47,6 @@ impl AppError {
     }
 }
 
-impl_from_axum_error!(
-    axum::extract::rejection::FormRejection,
-    axum::extract::rejection::JsonRejection,
-    axum::extract::rejection::PathRejection,
-    axum::extract::rejection::QueryRejection,
-    // axum::extract::multipart::MultipartRejection,
-    // axum::extract::multipart::MultipartError,
-);
-
 impl_into_internal_error!(std::io::Error, serde_json::Error,);
 
 impl From<AppError> for AppResponse {
@@ -67,18 +55,10 @@ impl From<AppError> for AppResponse {
     }
 }
 
-impl IntoResponse for AppError {
-    fn into_response(self) -> Response {
-        // let code = self.status_code;
-        // let mut res = AppResponse::from(self).into_response();
-        // if let StatusCode::UNAUTHORIZED = code {
-        //     let bearer = HeaderValue::from_str("Bearer").unwrap();
-        //     res.headers_mut().insert("WWW-Authenticate", bearer);
-        //     res
-        // } else {
-        //     res
-        // }
-        AppResponse::from(self).into_response()
+#[async_trait]
+impl Writer for AppError {
+    async fn write(self, _req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+        res.render(AppResponse::from(self))
     }
 }
 

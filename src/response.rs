@@ -1,9 +1,5 @@
-use axum::{
-    http::StatusCode,
-    response::{IntoResponse, Json, Response},
-};
+use salvo::prelude::*;
 use serde::Serialize;
-use serde_json::json;
 
 #[derive(Debug, Serialize)]
 pub struct AppResponse<T = (), M = ()> {
@@ -99,8 +95,9 @@ impl AppResponse {
     }
 }
 
-impl<T: Serialize, M: Serialize> IntoResponse for AppResponse<T, M> {
-    fn into_response(self) -> Response {
-        (self.status_code, Json(json!(self))).into_response()
+impl<T: Serialize + Send, M: Serialize + Send> Scribe for AppResponse<T, M> {
+    fn render(self, res: &mut Response) {
+        res.status_code(self.status_code);
+        res.render(Json(self))
     }
 }
