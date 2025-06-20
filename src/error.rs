@@ -1,4 +1,4 @@
-use crate::{impl_into_internal_error, response::AppResponse};
+use crate::response::AppResponse;
 use salvo::prelude::*;
 use serde::Serialize;
 
@@ -46,8 +46,6 @@ impl AppError {
         self.status_code
     }
 }
-
-impl_into_internal_error!(std::io::Error, serde_json::Error,);
 
 impl From<AppError> for AppResponse {
     fn from(value: AppError) -> Self {
