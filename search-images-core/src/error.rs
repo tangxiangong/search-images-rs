@@ -19,6 +19,8 @@ pub enum Error {
     FolderNotFound(String),
     #[error("Folder is empty: {0}")]
     FolderEmpty(String),
+    #[error("Collection Error: {0}")]
+    CollectionError(String),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
