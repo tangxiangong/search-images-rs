@@ -1,30 +1,49 @@
-[package]
-name = "search-images-rs"
+[workspace]
+resolver = "3"
+members = [".", "search-images-core"]
+
+[workspace.package]
+authors = ["tangxiangong <tangxiangong@gmail.com>"]
+license = "MIT"
 version = "0.1.0"
 edition = "2024"
 
-[features]
-default = []
-accelerate = ["candle-transformers/accelerate"]
-cuda = ["candle-transformers/cuda"]
-cudnn = ["candle-transformers/cudnn"]
-mkl = ["candle-transformers/mkl"]
-
-# 如果目标平台是 Apple Silicon，则启用 accelerate 特性
-[target.'cfg(all(target_os = "macos", target_arch = "aarch64"))'.dependencies]
-candle-transformers = { version = "0.9.1", features = ["accelerate"] }
-
-[dependencies]
+[workspace.dependencies]
 candle-core = "0.9.1"
 candle-nn = "0.9.1"
 candle-transformers = "0.9.1"
 config = { version = "0.15.11", features = ["toml"] }
-hf-hub = {version = "0.4.3", default-features = false, features = ["ureq", "rustls-tls"]}
+hf-hub = { version = "0.4.3", default-features = false, features = [
+    "ureq",
+    "rustls-tls",
+] }
 image = "0.25.6"
 qdrant-client = "1.14.0"
 salvo = { version = "0.79.0", features = ["affix-state", "rustls", "timeout"] }
 serde = { version = "1", features = ["derive"] }
 tokio = { version = "1", features = ["rt", "macros", "rt-multi-thread"] }
+tracing = "0.1.41"
+thiserror = "2"
+
+[package]
+name = "search-images-rs"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+tokio = { workspace = true }
+serde = { workspace = true }
+salvo = { workspace = true }
+tracing = { workspace = true }
+config = { workspace = true }
+candle-core = { workspace = true }
+search-images-core = { path = "search-images-core", features = ["serde"] }
+
+[features]
+default = []
+cuda = ["search-images-core/cuda"]
+cudnn = ["search-images-core/cudnn"]
+mkl = ["search-images-core/mkl"]
 
 [profile.release]
 lto = true
