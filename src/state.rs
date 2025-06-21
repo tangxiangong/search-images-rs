@@ -5,7 +5,7 @@ use search_images_core::{
     error::Error,
 };
 
-pub fn get() -> App {
+pub async fn get() -> App {
     let config = Config::load();
     let device = match config.mobilenet.device().into_device() {
         Ok(_) => config.mobilenet.device(),
@@ -15,7 +15,7 @@ pub fn get() -> App {
         }
     };
     let mobilenet_config = MobilenetConfig::new(config.mobilenet.kind(), device);
-    match App::new(&config.db, &mobilenet_config) {
+    match App::new(&config.db, &mobilenet_config).await {
         Ok(app) => app,
         Err(e) => {
             match e {
