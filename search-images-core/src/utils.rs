@@ -1,18 +1,15 @@
-use crate::error::{AppError, AppResult};
+use crate::error::Result;
 use candle_core::{DType, Device, Tensor};
 use image::DynamicImage;
 
-pub fn load_image(path: impl AsRef<std::path::Path>) -> AppResult<DynamicImage> {
-    image::ImageReader::open(&path)
-        .map_err(|e| AppError::bad_request(e.to_string()))?
-        .decode()
-        .map_err(|e| AppError::bad_request(e.to_string()))
+pub fn load_image(path: impl AsRef<std::path::Path>) -> Result<DynamicImage> {
+    Ok(image::ImageReader::open(&path)?.decode()?)
 }
 
 pub fn image_to_tensor(
     path: impl AsRef<std::path::Path>,
     resize_shape: Option<(u32, u32)>,
-) -> AppResult<Tensor> {
+) -> Result<Tensor> {
     let original_img = load_image(&path)?;
     let img = match resize_shape {
         Some((width, height)) => {
