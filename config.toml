@@ -1,0 +1,9 @@
+port = 8080
+
+[db]
+url = "127.0.0.1"
+port = 6333
+
+[mobilenet]
+kind = "hybrid_large"
+device = "cpu"
