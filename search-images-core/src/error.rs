@@ -15,6 +15,10 @@ pub enum Error {
     ImageError(#[from] image::ImageError),
     #[error("Qdrant Error: {0}")]
     QdrantBuildError(String),
+    #[error("Folder not found: {0}")]
+    FolderNotFound(String),
+    #[error("Folder is empty: {0}")]
+    FolderEmpty(String),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
