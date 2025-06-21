@@ -3519,10 +3519,12 @@ dependencies = [
  "candle-core",
  "candle-nn",
  "candle-transformers",
+ "cfg-if",
  "config",
  "hf-hub",
  "image",
  "qdrant-client",
+ "rayon",
  "serde",
  "thiserror 2.0.12",
 ]
