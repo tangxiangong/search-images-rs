@@ -1,5 +1,9 @@
-use crate::{config::NetworkKind, error::Result, utils::image_to_tensor};
-use candle_core::{DType, Device};
+use crate::{
+    config::NetworkKind,
+    error::{Error, Result},
+    utils::image_to_tensor,
+};
+use candle_core::{DType, Device, Tensor};
 use candle_nn::{Module, VarBuilder};
 use candle_transformers::models::{mimi::candle_nn::Func, mobilenetv4};
 
@@ -38,11 +42,66 @@ impl Extractor {
         self.kind.config()
     }
 
-    pub fn extract(&self, image_path: impl AsRef<std::path::Path>) -> Result<Vec<f32>> {
+    pub fn extract<T>(&self, image_path: T) -> Result<Vec<f32>>
+    where
+        T: AsRef<std::path::Path>,
+    {
         let img = image_to_tensor(image_path, Some((self.resolution(), self.resolution())))?
             .to_device(&self.device)?;
         let feature = self.network.forward(&img.unsqueeze(0)?)?.flatten_all()?;
         Ok(feature.to_vec1::<f32>()?)
+    }
+
+    pub fn extract_batch<T>(&self, image_paths: &[T]) -> Result<Vec<Vec<f32>>>
+    where
+        T: AsRef<std::path::Path>,
+    {
+        let process_image = |path: &T| -> Result<Tensor> {
+            Ok(
+                image_to_tensor(path, Some((self.resolution(), self.resolution())))?
+                    .to_device(&self.device)?,
+            )
+        };
+        cfg_if::cfg_if! {
+            if #[cfg(feature = "rayon")] {
+                use rayon::prelude::*;
+                let tensors = image_paths
+                    .par_iter()
+                    .map(process_image)
+                    .collect::<Result<Vec<_>>>()?;
+            } else {
+                let tensors = image_paths
+                    .iter()
+                    .map(process_image)
+                    .collect::<Result<Vec<_>>>()?;
+            }
+        };
+
+        let batch_tensor = Tensor::stack(&tensors, 0)?;
+        let features = self
+            .network
+            .forward(&batch_tensor)?
+            .flatten_from(1)?
+            .to_vec2::<f32>()?;
+
+        Ok(features)
+    }
+
+    pub fn extract_folder<T>(&self, folder_path: T) -> Result<Vec<Vec<f32>>>
+    where
+        T: AsRef<std::path::Path>,
+    {
+        let path_str = folder_path.as_ref().to_string_lossy().to_string();
+        if !(folder_path.as_ref().exists() && folder_path.as_ref().is_dir()) {
+            return Err(Error::FolderNotFound(path_str));
+        }
+        let image_paths = std::fs::read_dir(folder_path)?
+            .map(|entry| -> Result<_> { Ok(entry?.path()) })
+            .collect::<Result<Vec<_>>>()?;
+        if image_paths.is_empty() {
+            return Err(Error::FolderEmpty(path_str));
+        }
+        self.extract_batch(&image_paths)
     }
 
     pub fn resolution(&self) -> u32 {
