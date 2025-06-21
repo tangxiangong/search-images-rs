@@ -7,17 +7,14 @@ use search_images_core::{
 
 pub fn get() -> App {
     let config = Config::load();
-    let device = match config.mobilenet.device.into_device() {
-        Ok(_) => config.mobilenet.device,
+    let device = match config.mobilenet.device().into_device() {
+        Ok(_) => config.mobilenet.device(),
         Err(e) => {
             tracing::warn!("Failed to use device: {:?}, using CPU instead", e);
             Device::Cpu
         }
     };
-    let mobilenet_config = MobilenetConfig {
-        kind: config.mobilenet.kind,
-        device,
-    };
+    let mobilenet_config = MobilenetConfig::new(config.mobilenet.kind(), device);
     match App::new(&config.db, &mobilenet_config) {
         Ok(app) => app,
         Err(e) => {

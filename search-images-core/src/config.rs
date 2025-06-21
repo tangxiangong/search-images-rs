@@ -52,18 +52,47 @@ impl NetworkKind {
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DbConfig {
-    pub url: String,
-    pub port: u16,
+    url: String,
+    port: u16,
+    collection: String,
+}
+
+impl DbConfig {
+    pub fn url(&self) -> &str {
+        &self.url
+    }
+
+    pub fn port(&self) -> u16 {
+        self.port
+    }
+
+    pub fn collection(&self) -> &str {
+        &self.collection
+    }
 }
 
 #[derive(Debug, Clone, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MobilenetConfig {
-    pub kind: NetworkKind,
-    pub device: Device,
+    kind: NetworkKind,
+    device: Device,
 }
 
-#[derive(Debug, Clone, Default)]
+impl MobilenetConfig {
+    pub fn new(kind: NetworkKind, device: Device) -> Self {
+        Self { kind, device }
+    }
+
+    pub fn kind(&self) -> NetworkKind {
+        self.kind
+    }
+
+    pub fn device(&self) -> Device {
+        self.device
+    }
+}
+
+#[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Device {
     #[default]
@@ -99,6 +128,7 @@ impl Default for DbConfig {
         Self {
             url: "127.0.0.1".to_string(),
             port: 6333,
+            collection: "images".to_string(),
         }
     }
 }
