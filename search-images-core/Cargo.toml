@@ -7,24 +7,24 @@ edition.workspace = true
 
 [dependencies]
 thiserror = { workspace = true }
-candle-core = "0.9.1"
-candle-nn = "0.9.1"
-candle-transformers = "0.9.1"
-config = { version = "0.15.11", features = ["toml"] }
-hf-hub = { version = "0.4.3", default-features = false, features = [
-    "ureq",
-    "rustls-tls",
-] }
-image = "0.25.6"
-qdrant-client = "1.14.0"
+candle-core = { workspace = true }
+candle-nn = { workspace = true }
+candle-transformers = { workspace = true }
+config = { workspace = true }
+hf-hub = { workspace = true }
+image = { workspace = true }
+qdrant-client = { workspace = true }
+cfg-if = { workspace = true }
 # 如果目标平台是 Apple Silicon，则启用 accelerate 特性
 [target.'cfg(all(target_os = "macos", target_arch = "aarch64"))'.dependencies]
-candle-transformers = { version = "0.9.1", features = ["accelerate"] }
+candle-transformers = { workspace = true, features = ["accelerate"] }
 serde = { workspace = true, optional = true }
+rayon = { workspace = true, optional = true }
 
 [features]
 default = []
 serde = ["dep:serde"]
+rayon = ["dep:rayon"]
 cuda = ["candle-transformers/cuda"]
 cudnn = ["candle-transformers/cudnn"]
 mkl = ["candle-transformers/mkl"]
