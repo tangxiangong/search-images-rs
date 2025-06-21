@@ -65,16 +65,14 @@ pub type AppResult<T = ()> = Result<T, AppError>;
 
 pub type AppResponseResult<T = (), M = ()> = AppResult<AppResponse<T, M>>;
 
-macro_rules! internal_error {
-    ($($error:ty),+ $(,)?) => {
-        $(
-            impl From<$error> for AppError {
-                fn from(value: $error) -> Self {
-                    AppError::internal(value.to_string())
-                }
-            }
-        )*
-    };
-}
-
-internal_error!(hf_hub::api::sync::ApiError, candle_core::Error);
+// macro_rules! internal_error {
+//     ($($error:ty),+ $(,)?) => {
+//         $(
+//             impl From<$error> for AppError {
+//                 fn from(value: $error) -> Self {
+//                     AppError::internal(value.to_string())
+//                 }
+//             }
+//         )*
+//     };
+// }
