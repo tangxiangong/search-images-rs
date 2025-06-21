@@ -1,10 +1,7 @@
 pub mod api;
 pub mod configration;
-pub mod database;
 pub mod error;
-pub mod extractor;
 pub mod model;
 pub mod response;
 pub mod service;
 pub mod state;
-pub mod utils;
