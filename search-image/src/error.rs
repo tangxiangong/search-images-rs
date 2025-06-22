@@ -26,6 +26,10 @@ pub enum Error {
     JsonToPayloadError(String),
     #[error("Upsert Points Error: {0}")]
     UpsertPointsError(String),
+    #[error("Delete Points Error: {0}")]
+    DeletePointsError(String),
+    #[error("Search Points Error: {0}")]
+    SearchPointsError(String),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
