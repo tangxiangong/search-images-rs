@@ -18,12 +18,13 @@ cfg-if = { workspace = true }
 # 如果目标平台是 Apple Silicon，则启用 accelerate 特性
 [target.'cfg(all(target_os = "macos", target_arch = "aarch64"))'.dependencies]
 candle-transformers = { workspace = true, features = ["accelerate"] }
-serde = { workspace = true, optional = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
 rayon = { workspace = true, optional = true }
+uuid = { workspace = true }
 
 [features]
 default = []
-serde = ["dep:serde"]
 rayon = ["dep:rayon"]
 cuda = ["candle-transformers/cuda"]
 cudnn = ["candle-transformers/cudnn"]
