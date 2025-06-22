@@ -1,0 +1,9 @@
+[package]
+name = "front-ui"
+authors.workspace = true
+license.workspace = true
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+leptos = { workspace = true }
