@@ -1,12 +1,9 @@
 use crate::error::{Error, Result};
 use candle_transformers::models::mobilenetv4;
+use serde::Deserialize;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "snake_case")
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum NetworkKind {
     Small,
     Medium,
@@ -49,8 +46,7 @@ impl NetworkKind {
     }
 }
 
-#[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, Deserialize)]
 pub struct DbConfig {
     url: String,
     port: u16,
@@ -71,8 +67,7 @@ impl DbConfig {
     }
 }
 
-#[derive(Debug, Clone, Default)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, Default, Deserialize)]
 pub struct MobilenetConfig {
     kind: NetworkKind,
     device: Device,
@@ -92,8 +87,7 @@ impl MobilenetConfig {
     }
 }
 
-#[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Deserialize)]
 pub enum Device {
     #[default]
     Cpu,
