@@ -1,5 +1,5 @@
 [package]
-name = "search-images-core"
+name = "search-image"
 authors.workspace = true
 license.workspace = true
 version.workspace = true
