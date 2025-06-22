@@ -1,0 +1,21 @@
+[package]
+name = "web-sever"
+authors.workspace = true
+license.workspace = true
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+tokio = { workspace = true }
+serde = { workspace = true }
+salvo = { workspace = true }
+tracing = { workspace = true }
+config = { workspace = true }
+candle-core = { workspace = true }
+search-image = { path = "../search-image" }
+
+[features]
+default = []
+cuda = ["search-image/cuda"]
+cudnn = ["search-image/cudnn"]
+mkl = ["search-image/mkl"]

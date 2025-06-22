@@ -1,4 +1,4 @@
-use search_images_core::config::{DbConfig, MobilenetConfig};
+use search_image::config::{DbConfig, MobilenetConfig};
 use serde::Deserialize;
 use tokio::net::TcpListener;
 

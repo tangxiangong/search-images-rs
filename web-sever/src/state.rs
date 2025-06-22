@@ -1,5 +1,5 @@
 use crate::configration::Config;
-use search_images_core::{
+use search_image::{
     App,
     config::{Device, MobilenetConfig},
     error::Error,
