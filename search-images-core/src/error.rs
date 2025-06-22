@@ -1,4 +1,3 @@
-#[allow(clippy::result_large_err)]
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("CUDA not available")]
@@ -21,6 +20,12 @@ pub enum Error {
     FolderEmpty(String),
     #[error("Collection Error: {0}")]
     CollectionError(String),
+    #[error("Serde Error: {0}")]
+    SerdeError(#[from] serde_json::Error),
+    #[error("Json to Payload Error: {0}")]
+    JsonToPayloadError(String),
+    #[error("Upsert Points Error: {0}")]
+    UpsertPointsError(String),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
