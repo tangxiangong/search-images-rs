@@ -1,4 +1,7 @@
-use crate::error::{Error, Result};
+use crate::{
+    app::ImageInfo,
+    error::{Error, Result},
+};
 use qdrant_client::{
     Payload, Qdrant,
     qdrant::{
@@ -7,31 +10,26 @@ use qdrant_client::{
     },
 };
 use serde::Serialize;
-use std::collections::HashMap;
-use uuid::Uuid;
 
 pub async fn add<T: Serialize>(
     client: &Qdrant,
     collection: &str,
     data: &[Vec<f32>],
-    payload: &[T],
-) -> Result<Vec<String>> {
-    if data.len() != payload.len() {
+    image_info: &[ImageInfo<T>],
+) -> Result<()> {
+    if data.len() != image_info.len() {
         return Err(Error::UpsertPointsError(
-            "data and payload must have the same length".to_string(),
+            "`data` and `image_info` must have the same length".to_string(),
         ));
     }
-    let ids = (0..data.len())
-        .map(|_| Uuid::new_v4().to_string())
-        .collect::<Vec<_>>();
     let points = data
         .iter()
-        .zip(payload.iter().zip(ids.iter()))
-        .map(|(data, (payload, id))| {
-            let json_val = serde_json::to_value(payload)?;
+        .zip(image_info.iter())
+        .map(|(data, image_info)| {
+            let json_val = serde_json::to_value(image_info)?;
             let payload = Payload::try_from(json_val)
                 .map_err(|e| Error::JsonToPayloadError(e.to_string()))?;
-            let point = PointStruct::new(id.to_string(), data.to_vec(), payload);
+            let point = PointStruct::new(image_info.id().to_string(), data.to_vec(), payload);
             Ok(point)
         })
         .collect::<Result<Vec<_>>>()?;
@@ -44,7 +42,7 @@ pub async fn add<T: Serialize>(
         return Err(Error::UpsertPointsError("upsert points failed".to_string()));
     }
 
-    Ok(ids)
+    Ok(())
 }
 
 pub async fn delete_by_ids(client: &Qdrant, collection: &str, ids: &[String]) -> Result<()> {
@@ -64,20 +62,15 @@ pub async fn delete_by_ids(client: &Qdrant, collection: &str, ids: &[String]) ->
     Ok(())
 }
 
-pub async fn delete_by_payloads<T: Into<MatchValue>>(
+pub async fn delete_by_extras<T: Into<MatchValue>>(
     client: &Qdrant,
     collection: &str,
-    payloads: HashMap<String, T>,
+    extra: T,
 ) -> Result<()> {
     let response = client
         .delete_points(
             DeletePointsBuilder::new(collection)
-                .points(Filter::must(
-                    payloads
-                        .into_iter()
-                        .map(|(key, value)| Condition::matches(&key, value.into()))
-                        .collect::<Vec<_>>(),
-                ))
+                .points(Filter::must([Condition::matches("extra", extra.into())]))
                 .wait(true),
         )
         .await
@@ -91,11 +84,14 @@ pub async fn delete_by_payloads<T: Into<MatchValue>>(
 pub async fn search_by_ids(
     client: &Qdrant,
     collection: &str,
-    ids: &[String],
+    ids: &[&str],
     with_payload: bool,
     with_vectors: bool,
 ) -> Result<Vec<RetrievedPoint>> {
-    let point_ids = ids.iter().map(|id| id.clone().into()).collect::<Vec<_>>();
+    let point_ids = ids
+        .iter()
+        .map(|id| id.to_string().into())
+        .collect::<Vec<_>>();
 
     let response = client
         .get_points(

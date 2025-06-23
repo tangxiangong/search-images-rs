@@ -1,5 +1,6 @@
 use crate::{
     config::{DbConfig, MobilenetConfig},
+    database,
     error::{Error, Result},
     extractor::{Extractor, FEATURE_SIZE},
 };
@@ -8,11 +9,51 @@ use qdrant_client::{
     config::CompressionEncoding,
     qdrant::{CreateCollectionBuilder, Distance, VectorParamsBuilder},
 };
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
 pub struct App {
     db: Qdrant,
     extractor: Extractor,
     collection: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ImageInfo<T = ()> {
+    #[serde(skip)]
+    id: String,
+    path: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    extra: Option<T>,
+}
+
+impl<T> ImageInfo<T> {
+    pub fn with_extra(path: &str, extra: T) -> Self {
+        Self {
+            id: uuid::Uuid::new_v4().to_string(),
+            path: path.to_string(),
+            extra: Some(extra),
+        }
+    }
+
+    pub fn with_path(path: &str) -> Self {
+        Self {
+            id: uuid::Uuid::new_v4().to_string(),
+            path: path.to_string(),
+            extra: None,
+        }
+    }
+
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+
+    pub fn path(&self) -> &str {
+        &self.path
+    }
+
+    pub fn extra(&self) -> Option<&T> {
+        self.extra.as_ref()
+    }
 }
 
 impl App {
@@ -59,5 +100,31 @@ impl App {
 
     pub fn collection(&self) -> &str {
         &self.collection
+    }
+
+    pub async fn add_images<T: AsRef<std::path::Path>>(&self, paths: &[T]) -> Result<()> {
+        let info = paths
+            .iter()
+            .map(|path| ImageInfo::with_path(&path.as_ref().to_string_lossy()))
+            .collect::<Vec<ImageInfo<()>>>();
+        let features = self.extractor().extract_batch(paths)?;
+        database::add(&self.db, &self.collection, &features, &info).await
+    }
+
+    pub async fn add_images_with_extra<
+        T: Serialize + DeserializeOwned + Clone,
+        P: AsRef<std::path::Path>,
+    >(
+        &self,
+        paths: &[P],
+        extras: &[T],
+    ) -> Result<()> {
+        let info = paths
+            .iter()
+            .zip(extras)
+            .map(|(path, extra)| ImageInfo::with_extra(&path.as_ref().to_string_lossy(), extra.to_owned()))
+            .collect::<Vec<ImageInfo<T>>>();
+        let features = self.extractor().extract_batch(paths)?;
+        database::add(&self.db, &self.collection, &features, &info).await
     }
 }
