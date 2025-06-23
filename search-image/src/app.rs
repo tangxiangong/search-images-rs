@@ -59,7 +59,7 @@ impl<T> ImageInfo<T> {
 impl App {
     pub async fn new(db_config: &DbConfig, mobilenet_config: &MobilenetConfig) -> Result<Self> {
         let device = mobilenet_config.device().into_device()?;
-        let extractor = Extractor::new(mobilenet_config.kind(), &device)?;
+        let extractor = Extractor::new(mobilenet_config.kind(), &device).await?;
         let qdrant_url = format!("http://{}:{}", db_config.url(), db_config.port());
         let db = QdrantBuilder::from_url(&qdrant_url)
             .connect_timeout(std::time::Duration::from_secs(30))
@@ -122,7 +122,9 @@ impl App {
         let info = paths
             .iter()
             .zip(extras)
-            .map(|(path, extra)| ImageInfo::with_extra(&path.as_ref().to_string_lossy(), extra.to_owned()))
+            .map(|(path, extra)| {
+                ImageInfo::with_extra(&path.as_ref().to_string_lossy(), extra.to_owned())
+            })
             .collect::<Vec<ImageInfo<T>>>();
         let features = self.extractor().extract_batch(paths)?;
         database::add(&self.db, &self.collection, &features, &info).await

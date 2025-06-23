@@ -5,7 +5,7 @@ pub enum Error {
     #[error("Metal not available")]
     MetalError,
     #[error("HuggingFace API Error: {0}")]
-    HuggingFaceApiError(#[from] hf_hub::api::sync::ApiError),
+    HuggingFaceApiError(#[from] hf_hub::api::tokio::ApiError),
     #[error("Candle Error: {0}")]
     CandleError(#[from] candle_core::Error),
     #[error("IO Error: {0}")]

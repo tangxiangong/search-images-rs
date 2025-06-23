@@ -17,14 +17,14 @@ pub struct Extractor {
 }
 
 impl Extractor {
-    pub fn new(kind: NetworkKind, device: &Device) -> Result<Self> {
+    pub async fn new(kind: NetworkKind, device: &Device) -> Result<Self> {
         let config = kind.config();
         let model_name = kind.model_filename();
-        let api = hf_hub::api::sync::ApiBuilder::new()
+        let api = hf_hub::api::tokio::ApiBuilder::new()
             .with_cache_dir(std::path::PathBuf::from("./.cache"))
             .build()?;
         let api = api.model(model_name);
-        let model_file = api.get("model.safetensors")?;
+        let model_file = api.get("model.safetensors").await?;
         let vb = unsafe { VarBuilder::from_mmaped_safetensors(&[model_file], DType::F32, device)? };
         let network = mobilenetv4::mobilenetv4_no_final_layer(&config, vb)?;
         Ok(Self {
@@ -113,37 +113,47 @@ impl Extractor {
 mod tests {
     use super::*;
 
-    #[test]
-    fn test_small() {
-        let extractor = Extractor::new(NetworkKind::Small, &Device::Cpu).unwrap();
+    #[tokio::test]
+    async fn test_small() {
+        let extractor = Extractor::new(NetworkKind::Small, &Device::Cpu)
+            .await
+            .unwrap();
         let feature = extractor.extract("data/cpp.png").unwrap();
         assert_eq!(feature.len(), FEATURE_SIZE);
     }
 
-    #[test]
-    fn test_medium() {
-        let extractor = Extractor::new(NetworkKind::Medium, &Device::Cpu).unwrap();
+    #[tokio::test]
+    async fn test_medium() {
+        let extractor = Extractor::new(NetworkKind::Medium, &Device::Cpu)
+            .await
+            .unwrap();
         let feature = extractor.extract("data/cpp.png").unwrap();
         assert_eq!(feature.len(), FEATURE_SIZE);
     }
 
-    #[test]
-    fn test_large() {
-        let extractor = Extractor::new(NetworkKind::Large, &Device::Cpu).unwrap();
+    #[tokio::test]
+    async fn test_large() {
+        let extractor = Extractor::new(NetworkKind::Large, &Device::Cpu)
+            .await
+            .unwrap();
         let feature = extractor.extract("data/cpp.png").unwrap();
         assert_eq!(feature.len(), FEATURE_SIZE);
     }
 
-    #[test]
-    fn test_hybrid_medium() {
-        let extractor = Extractor::new(NetworkKind::HybridMedium, &Device::Cpu).unwrap();
+    #[tokio::test]
+    async fn test_hybrid_medium() {
+        let extractor = Extractor::new(NetworkKind::HybridMedium, &Device::Cpu)
+            .await
+            .unwrap();
         let feature = extractor.extract("data/cpp.png").unwrap();
         assert_eq!(feature.len(), FEATURE_SIZE);
     }
 
-    #[test]
-    fn test_hybrid_large() {
-        let extractor = Extractor::new(NetworkKind::HybridLarge, &Device::Cpu).unwrap();
+    #[tokio::test]
+    async fn test_hybrid_large() {
+        let extractor = Extractor::new(NetworkKind::HybridLarge, &Device::Cpu)
+            .await
+            .unwrap();
         let feature = extractor.extract("data/cpp.png").unwrap();
         assert_eq!(feature.len(), FEATURE_SIZE);
     }

@@ -22,6 +22,7 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 rayon = { workspace = true, optional = true }
 uuid = { workspace = true }
+tokio = { workspace = true }
 
 [features]
 default = []
