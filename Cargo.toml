@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = [".", "front-ui", "search-image", "web-sever"]
+members = ["front-ui", "search-image", "web-sever"]
 
 [workspace.package]
 authors = ["tangxiangong <tangxiangong@gmail.com>"]
