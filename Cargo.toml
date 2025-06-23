@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["search-image", "web-sever"]
+members = ["search-image", "slint-ui", "web-sever"]
 
 [workspace.package]
 authors = ["tangxiangong <tangxiangong@gmail.com>"]
@@ -14,7 +14,7 @@ candle-nn = "0.9.1"
 candle-transformers = "0.9.1"
 config = { version = "0.15.11", features = ["toml"] }
 hf-hub = { version = "0.4.3", default-features = false, features = [
-    "ureq",
+    "tokio",
     "rustls-tls",
 ] }
 image = "0.25.6"
@@ -27,7 +27,10 @@ tracing = "0.1.41"
 thiserror = "2"
 rayon = "1"
 cfg-if = "1"
-uuid = { version = "1.14.0", features = ["v4"] }
+uuid = { version = "1.17", features = ["v4"] }
+slint = "1"
+rfd = "0.15"
+anyhow = "1"
 
 [profile.release]
 lto = true
